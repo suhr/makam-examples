@@ -1,0 +1,15 @@
+name: Makam
+on: [push]
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v2
+    - name: Install Makam
+      run: npm install makam
+    - name: Run all Makam files
+      run: |
+        for f in *.makam; do
+          ./node_modules/.bin/makam "$f" || exit 1
+        done
