@@ -1,0 +1,86 @@
+% A description of the concatenative algebra
+% Thanks Antonis Stampoulis for the help
+
+expr: type.
+
+conc: expr -> expr -> expr.
+comp: expr -> expr -> expr.
+
+id: expr.
+dup: expr.
+drop: expr.
+swap: expr.
+
+quote: expr -> expr.
+apply: expr.
+unit: expr.
+qcomp: expr.
+
+lam: (expr -> expr) -> expr.
+
+ty: type.
+arrow: list ty -> list ty -> ty.
+
+scheme : type.
+pi: (ty -> scheme) -> scheme.
+base: ty -> scheme.
+
+typeof: expr -> scheme -> prop.
+typeofmatches : expr -> ty -> prop.
+
+instantiate: scheme -> ty -> prop.
+instantiate (base T) T.
+instantiate (pi F) T :- instantiate (F X) T.
+
+generalize: ty -> scheme -> prop.
+generalize T (pi S) when refl.getunif T (X: ty) :-
+  refl.absunif T X F,
+  (a:ty -> generalize (F a) (S a)).
+generalize T (base T) when not(refl.getunif T (X: ty)).
+
+typeofmatches E T :-
+    typeof E S, instantiate S T.
+
+typeof (comp Ex Ey) R :-
+    typeofmatches Ex (arrow Tx Ty),
+    typeofmatches Ey (arrow Ty Tz),
+    generalize (arrow Tx Tz) R.
+
+typeof (conc Ea Eb) R :-
+    typeofmatches Ea (arrow Ta Tx),
+    typeofmatches Eb (arrow Tb Ty),
+    append Ta Tb Tab, append Tx Ty Txy,
+    generalize (arrow Tab Txy) R.
+
+typeof id (pi (fun t => base (arrow [t] [t]))).
+typeof dup (pi (fun t => base (arrow [t] [t, t]))).
+typeof drop (pi (fun t => base (arrow [t] []))).
+typeof swap (pi (fun t => base (arrow [t, t] [t, t]))).
+
+typeof (quote E) R :-
+    typeofmatches E T,
+    generalize (arrow [] [T]) R.
+
+typeof apply (pi (fun a => pi (fun b => base (arrow [a, arrow [a] [b]] [b])))).
+
+typeof unit (pi (fun t => base (arrow [t] [arrow [] [t]]))).
+
+
+tests : testsuite.
+%testsuite tests.
+
+typeof (conc dup dup) T ?
+>> Yes:
+>> T := pi (fun a => pi (fun b => base (arrow [b, a] [b, b, a, a]))).
+
+typeof (conc id id) T ?
+>> Yes:
+>> T := pi (fun a => pi (fun b => base (arrow [b, a] [b, a]))).
+
+typeof (comp dup swap) T ?
+>> Yes:
+>> T := pi (fun a => base (arrow [a] [a, a])).
+
+typeof (comp swap swap) T ?
+>> Yes:
+>> T := pi (fun a => base (arrow [a, a] [a, a])).

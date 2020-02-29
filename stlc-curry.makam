@@ -1,0 +1,52 @@
+% Simply typed lambda calculus with extrinsic typing
+
+% Terms
+term: type.
+
+% `[x] M` (de Bruijn notation)
+lam: (term -> term) -> term.
+% `(M) N`
+app: term -> term -> term.
+% A constructor of the unit type
+u: term.
+
+% Operational semantics
+step: term -> term -> prop.
+step (app E (lam F)) (F E).
+
+eval: term -> term -> prop.
+eval Ex Ey :-
+    if step Ex Ez
+    then eval Ez Ey
+    else (eq Ex Ey).
+
+% Types
+ty: type.
+arrow: ty -> ty -> ty.
+unit: ty.
+
+typeof: term -> ty -> prop.
+
+% →-introduction
+typeof (lam F) (arrow A B) :-
+    (x: term -> typeof x A -> typeof (F x) B).
+
+% →-elimination
+typeof (app Ex Ey) T :-
+    typeof Ex Tx,
+    typeof Ey (arrow Tx T).
+
+% Unit type
+typeof u unit.
+
+
+tests : testsuite.
+%testsuite tests.
+
+eval (app (lam (fun x => x)) (lam (fun y => (app y y)))) E ?
+>> Yes:
+>> E := lam (fun x => x).
+
+typeof (app u (lam (fun x => x))) T ?
+>> Yes:
+>> T := unit.
