@@ -1,0 +1,43 @@
+% Bidirectional type checking of STLC
+% As described in http://www.davidchristiansen.dk/tutorials/bidirectional.pdf
+
+term: type.
+ty: type.
+
+% `[x] M` (de Bruijn notation)
+lam: (term -> term) -> term.
+% `(M) N`
+app: term -> term -> term.
+
+b: bool -> term.
+cond: term -> term -> term -> term.
+
+ann: ty -> term -> term.
+
+% Types
+arrow: ty -> ty -> ty.
+boolean: ty.
+
+infer: term -> ty -> prop.
+check: term -> ty -> prop.
+
+infer (b _) boolean.
+
+check E T :-
+    infer E T.
+infer (ann T E) T :-
+    check E T.
+
+check (cond C Ex Ey) T :-
+    check C boolean,
+    check Ex T,
+    check Ey T.
+
+check (lam F) (arrow A B) :-
+    (x: term -> infer x A -> check (F x) B).
+
+check (app Ex Ey) T :-
+    infer Ey (arrow Tx T),
+    check Ex Tx.
+
+% TODO: tests
