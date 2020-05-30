@@ -1,0 +1,45 @@
+% Relational algebra: multiset version
+% See https://drops.dagstuhl.de/opus/volltexte/2019/10310/pdf/LIPIcs-ICDT-2019-8.pdf
+
+expr: type.
+
+% λ the ultimate
+lam: (expr -> expr) -> expr.
+app: expr -> expr -> expr.
+
+% σ, π and ×
+select: (expr -> expr) -> expr -> expr.
+project: (expr -> expr) -> expr -> expr.
+cross: expr -> expr -> expr.
+
+% Operations on multisets:
+
+% μ(X + Y, a) = μ(X, a) + μ(Y, a)
+% μ(X ⋅ Y, a) = μ(X, a) μ(Y, a)
+% μ(X ∪ Y, a) = μ(X, a) ∨ μ(Y, a)
+% μ(X ∩ Y, a) = μ(X, a) ∧ μ(Y, a)
+% μ(X \ Y, a) = μ(X, a) ⋅ (1 - χ(Y))
+
+sum: expr -> expr -> expr.
+mul: expr -> expr -> expr.
+union: expr -> expr -> expr.
+intersect: expr -> expr -> expr.
+filter: expr -> expr -> expr.
+
+% Collapse a multiset to the corresponding set
+setify: expr -> expr.
+
+% Some logic
+and: expr -> expr -> expr.
+or: expr -> expr -> expr.
+not: expr -> expr.
+
+% And some basic relations
+eq: expr -> expr -> expr.
+gt: expr -> expr -> expr.
+lt: expr -> expr -> expr.
+
+% Values
+i: int -> expr.
+s: string -> expr.
+b: bool -> expr.
